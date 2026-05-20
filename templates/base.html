@@ -154,9 +154,29 @@
 
     <div class="flex-grow-1 py-2">
         <div class="sidebar-section">Principal</div>
+        {% if user.rol == 'paciente' %}
+        <a href="{% url 'medicos:cita_lista' %}" class="nav-link {% if request.resolver_match.namespace == 'medicos' and 'cita' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="bi bi-calendar-check"></i> Mis citas
+        </a>
+        <a href="{% url 'medicos:cita_crear' %}" class="nav-link {% if request.resolver_match.namespace == 'medicos' and request.resolver_match.url_name == 'cita_crear' %}active{% endif %}">
+            <i class="bi bi-calendar-plus"></i> Agendar cita
+        </a>
+        {% else %}
         <a href="{% url 'pacientes:lista' %}" class="nav-link {% if request.resolver_match.namespace == 'pacientes' %}active{% endif %}">
             <i class="bi bi-people"></i> Pacientes
         </a>
+        <a href="{% url 'medicos:cita_lista' %}" class="nav-link {% if request.resolver_match.namespace == 'medicos' and 'cita' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="bi bi-calendar-check"></i> Citas
+        </a>
+        {% if es_admin %}
+            <a href="{% url 'medicos:medico_lista' %}" class="nav-link {% if request.resolver_match.namespace == 'medicos' and 'medico' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="bi bi-person-badge"></i> Medicos
+            </a>
+        {% endif %}
+        <a href="{% url 'medicos:horario_lista' %}" class="nav-link {% if request.resolver_match.namespace == 'medicos' and 'horario' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="bi bi-clock"></i> Horarios
+        </a>
+        {% endif %}
 
         {% if es_admin %}
         <div class="sidebar-section">Administracion</div>

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Medicos{% endblock %}
+{% block page_title %}Medicos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0">Medicos</h4>
+        <small class="text-muted">{{ total }} registro{{ total|pluralize }}</small>
+    </div>
+    {% if user.rol == 'admin' or user.is_superuser %}
+    <a href="{% url 'medicos:medico_crear' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Nuevo medico
+    </a>
+    {% endif %}
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-7">{{ form.q.label_tag }}{{ form.q }}</div>
+            <div class="col-md-3">{{ form.activo.label_tag }}{{ form.activo }}</div>
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-outline-primary" type="submit">
+                    <i class="bi bi-search me-1"></i> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Medico</th>
+                    <th>Especialidad</th>
+                    <th>Telefono</th>
+                    <th>Licencia</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for medico in medicos %}
+                <tr>
+                    <td>{{ medico.nombre_completo }}</td>
+                    <td>{{ medico.especialidad }}</td>
+                    <td>{{ medico.telefono }}</td>
+                    <td>{{ medico.numero_licencia }}</td>
+                    <td>
+                        <span class="badge {% if medico.activo %}bg-success{% else %}bg-secondary{% endif %}">
+                            {% if medico.activo %}Activo{% else %}Inactivo{% endif %}
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'medicos:medico_detalle' medico.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        {% if user.rol == 'admin' or user.is_superuser %}
+                        <a href="{% url 'medicos:medico_editar' medico.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'medicos:medico_eliminar' medico.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center py-4 text-muted">No hay medicos registrados.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include 'medicos/pagination.html' %}
+{% endblock %}
+

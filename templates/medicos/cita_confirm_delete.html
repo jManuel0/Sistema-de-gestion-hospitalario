@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar cita{% endblock %}
+{% block page_title %}Eliminar cita{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-danger">
+            <div class="card-header text-danger"><i class="bi bi-exclamation-triangle me-1"></i> Confirmar eliminacion</div>
+            <div class="card-body">
+                <p>Esta accion eliminara la cita seleccionada.</p>
+                <div class="alert alert-warning">
+                    {{ object.paciente.nombre_completo }} con {{ object.medico.nombre_completo }} el {{ object.fecha|date:'d/m/Y' }} a las {{ object.hora|time:'H:i' }}
+                </div>
+                <form method="post" class="d-flex justify-content-end gap-2">
+                    {% csrf_token %}
+                    <a href="{% url 'medicos:cita_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i> Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

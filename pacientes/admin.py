@@ -5,7 +5,7 @@ from .models import Paciente, HistoriaClinica
 class HistoriaClinicaInline(admin.TabularInline):
     model = HistoriaClinica
     extra = 0
-    fields = ['fecha', 'medico_nombre', 'motivo_consulta', 'diagnostico']
+    fields = ['fecha', 'medico', 'medico_nombre', 'motivo_consulta', 'diagnostico']
     readonly_fields = ['fecha_creacion']
 
 
@@ -33,8 +33,8 @@ class PacienteAdmin(admin.ModelAdmin):
 
 @admin.register(HistoriaClinica)
 class HistoriaClinicaAdmin(admin.ModelAdmin):
-    list_display = ['paciente', 'fecha', 'medico_nombre', 'motivo_consulta']
+    list_display = ['paciente', 'fecha', 'medico', 'medico_nombre', 'motivo_consulta']
     list_filter = ['fecha']
-    search_fields = ['paciente__nombre', 'paciente__apellido', 'paciente__dni', 'diagnostico']
+    search_fields = ['paciente__nombre', 'paciente__apellido', 'paciente__dni', 'medico__usuario__first_name', 'medico__usuario__last_name', 'diagnostico']
     ordering = ['-fecha']
     readonly_fields = ['fecha_creacion']

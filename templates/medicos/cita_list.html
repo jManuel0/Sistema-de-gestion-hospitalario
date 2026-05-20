@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if user.rol == 'paciente' %}Mis citas{% else %}Citas{% endif %}{% endblock %}
+{% block page_title %}{% if user.rol == 'paciente' %}Mis citas{% else %}Citas medicas{% endif %}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0">{% if user.rol == 'paciente' %}Mis citas{% else %}Citas{% endif %}</h4>
+        <small class="text-muted">{{ total }} registro{{ total|pluralize }}</small>
+    </div>
+    <a href="{% url 'medicos:cita_crear' %}" class="btn btn-primary"><i class="bi bi-calendar-plus me-1"></i> {% if user.rol == 'paciente' %}Agendar cita{% else %}Nueva cita{% endif %}</a>
+</div>
+
+{% if user.rol == 'paciente' %}
+<div class="alert alert-primary">
+    <i class="bi bi-calendar-check me-1"></i> Aqui se muestran tus proximas citas agendadas.
+</div>
+{% endif %}
+
+{% if user.rol != 'paciente' %}
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">{{ form.q.label_tag }}{{ form.q }}</div>
+            <div class="col-md-2">{{ form.fecha.label_tag }}{{ form.fecha }}</div>
+            <div class="col-md-3">{{ form.medico.label_tag }}{{ form.medico }}</div>
+            <div class="col-md-2">{{ form.estado.label_tag }}{{ form.estado }}</div>
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search me-1"></i> Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    {% if user.rol != 'paciente' %}<th>Paciente</th>{% endif %}
+                    <th>Medico</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cita in citas %}
+                <tr>
+                    <td>{{ cita.fecha|date:'d/m/Y' }}</td>
+                    <td>{{ cita.hora|time:'H:i' }}</td>
+                    {% if user.rol != 'paciente' %}<td>{{ cita.paciente.nombre_completo }}</td>{% endif %}
+                    <td>{{ cita.medico.nombre_completo }}</td>
+                    <td><span class="badge bg-{% if cita.estado == 'confirmada' %}success{% elif cita.estado == 'cancelada' %}danger{% elif cita.estado == 'completada' %}secondary{% else %}warning text-dark{% endif %}">{{ cita.get_estado_display }}</span></td>
+                    <td class="text-end">
+                        <a href="{% url 'medicos:cita_detalle' cita.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        {% if user.rol != 'paciente' %}
+                        <a href="{% url 'medicos:cita_editar' cita.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'medicos:cita_eliminar' cita.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="{% if user.rol == 'paciente' %}5{% else %}6{% endif %}" class="text-center text-muted py-4">No hay citas registradas.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include 'medicos/pagination.html' %}
+{% endblock %}

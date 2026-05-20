@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle cita{% endblock %}
+{% block page_title %}Detalle cita{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="{% url 'medicos:cita_lista' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Volver</a>
+    {% if user.rol != 'paciente' %}
+    <a href="{% url 'medicos:cita_editar' cita.pk %}" class="btn btn-primary"><i class="bi bi-pencil me-1"></i> Editar</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">Cita medica</div>
+    <div class="card-body">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <h6 class="text-muted">Paciente</h6>
+                <p class="fs-5 mb-0">{{ cita.paciente.nombre_completo }}</p>
+                <small>DNI: {{ cita.paciente.dni }}</small>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-muted">Medico</h6>
+                <p class="fs-5 mb-0">{{ cita.medico.nombre_completo }}</p>
+                <small>{{ cita.medico.especialidad }}</small>
+            </div>
+            <div class="col-md-3"><h6 class="text-muted">Fecha</h6><p>{{ cita.fecha|date:'d/m/Y' }}</p></div>
+            <div class="col-md-3"><h6 class="text-muted">Hora</h6><p>{{ cita.hora|time:'H:i' }}</p></div>
+            <div class="col-md-3"><h6 class="text-muted">Estado</h6><p>{{ cita.get_estado_display }}</p></div>
+            <div class="col-md-3"><h6 class="text-muted">Creacion</h6><p>{{ cita.fecha_creacion|date:'d/m/Y H:i' }}</p></div>
+            <div class="col-12"><h6 class="text-muted">Motivo</h6><p>{{ cita.motivo|linebreaksbr }}</p></div>
+            {% if cita.observaciones %}
+            <div class="col-12"><h6 class="text-muted">Observaciones</h6><p>{{ cita.observaciones|linebreaksbr }}</p></div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
