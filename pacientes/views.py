@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponse
 from django.utils import timezone
+from django.core.paginator import Paginator
 
 from .models import Paciente, HistoriaClinica
 from .forms import PacienteForm, HistoriaClinicaForm, BuscarPacienteForm
@@ -16,7 +17,7 @@ from .utils import exportar_pacientes_excel, exportar_historia_pdf
 
 @login_required
 def lista_pacientes(request):
-    """Lista de pacientes con búsqueda y filtros."""
+    """Lista de pacientes con búsqueda, filtros y paginación."""
     form = BuscarPacienteForm(request.GET or None)
     pacientes = Paciente.objects.all()
 
@@ -37,8 +38,15 @@ def lista_pacientes(request):
             pacientes = pacientes.filter(activo=False)
 
     total = pacientes.count()
+
+    # Paginación: 10 pacientes por página
+    paginator = Paginator(pacientes, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'pacientes/lista.html', {
-        'pacientes': pacientes,
+        'pacientes': page_obj,
+        'page_obj': page_obj,
         'form': form,
         'total': total,
     })
