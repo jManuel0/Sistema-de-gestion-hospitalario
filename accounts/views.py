@@ -7,10 +7,16 @@ from .models import Usuario
 from .decorators import solo_admin
 
 
+def redireccion_por_rol(user):
+    if getattr(user, 'rol', None) == 'paciente':
+        return 'medicos:cita_lista'
+    return 'pacientes:lista'
+
+
 def login_view(request):
     """Vista de inicio de sesión."""
     if request.user.is_authenticated:
-        return redirect('pacientes:lista')
+        return redirect(redireccion_por_rol(request.user))
 
     form = LoginForm(request, data=request.POST or None)
 
@@ -22,7 +28,7 @@ def login_view(request):
                 return render(request, 'accounts/login.html', {'form': form})
             login(request, user)
             messages.success(request, f'Bienvenido, {user.get_full_name() or user.username}.')
-            next_url = request.GET.get('next', 'pacientes:lista')
+            next_url = request.GET.get('next') or redireccion_por_rol(user)
             return redirect(next_url)
         else:
             messages.error(request, 'Usuario o contraseña incorrectos.')
@@ -41,7 +47,7 @@ def logout_view(request):
 def registro_view(request):
     """Vista de registro de nuevos usuarios."""
     if request.user.is_authenticated:
-        return redirect('pacientes:lista')
+        return redirect(redireccion_por_rol(request.user))
 
     form = RegistroForm(request.POST or None)
 
@@ -50,7 +56,7 @@ def registro_view(request):
             user = form.save()
             login(request, user)
             messages.success(request, f'Cuenta creada exitosamente. Bienvenido, {user.get_full_name() or user.username}.')
-            return redirect('pacientes:lista')
+            return redirect(redireccion_por_rol(user))
         else:
             messages.error(request, 'Por favor corrige los errores del formulario.')
 

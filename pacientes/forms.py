@@ -84,11 +84,14 @@ class HistoriaClinicaForm(forms.ModelForm):
 
     class Meta:
         model = HistoriaClinica
-        fields = ['fecha', 'medico_nombre', 'motivo_consulta', 'diagnostico', 'tratamiento', 'observaciones']
+        fields = ['fecha', 'medico', 'medico_nombre', 'motivo_consulta', 'diagnostico', 'tratamiento', 'observaciones']
         widgets = {
             'fecha': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
+            }),
+            'medico': forms.Select(attrs={
+                'class': 'form-select'
             }),
             'medico_nombre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -117,12 +120,18 @@ class HistoriaClinicaForm(forms.ModelForm):
         }
         labels = {
             'fecha': 'Fecha de consulta',
+            'medico': 'Medico asociado',
             'medico_nombre': 'Médico tratante',
             'motivo_consulta': 'Motivo de consulta',
             'diagnostico': 'Diagnóstico',
             'tratamiento': 'Tratamiento',
             'observaciones': 'Observaciones',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from medicos.models import Medico
+        self.fields['medico'].queryset = Medico.objects.filter(activo=True).select_related('usuario')
 
 
 class BuscarPacienteForm(forms.Form):

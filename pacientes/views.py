@@ -11,12 +11,22 @@ from .forms import PacienteForm, HistoriaClinicaForm, BuscarPacienteForm
 from .utils import exportar_pacientes_excel, exportar_historia_pdf
 
 
+def requiere_admin_o_medico(request):
+    if request.user.is_superuser or getattr(request.user, 'rol', None) in ['admin', 'medico']:
+        return True
+    messages.error(request, 'No tienes permisos para acceder a gestion de pacientes.')
+    return False
+
+
 # ─────────────────────────────────────────────
 #  CRUD PACIENTES
 # ─────────────────────────────────────────────
 
 @login_required
 def lista_pacientes(request):
+    if not requiere_admin_o_medico(request):
+        return redirect('medicos:cita_lista')
+
     """Lista de pacientes con búsqueda, filtros y paginación."""
     form = BuscarPacienteForm(request.GET or None)
     pacientes = Paciente.objects.all()
@@ -54,6 +64,9 @@ def lista_pacientes(request):
 
 @login_required
 def detalle_paciente(request, pk):
+    if not requiere_admin_o_medico(request):
+        return redirect('medicos:cita_lista')
+
     """Detalle de un paciente con su historia clínica."""
     paciente = get_object_or_404(Paciente, pk=pk)
     historias = paciente.historias.all()
@@ -65,6 +78,9 @@ def detalle_paciente(request, pk):
 
 @login_required
 def crear_paciente(request):
+    if not requiere_admin_o_medico(request):
+        return redirect('medicos:cita_lista')
+
     """Crear un nuevo paciente."""
     form = PacienteForm(request.POST or None)
 
@@ -85,6 +101,9 @@ def crear_paciente(request):
 
 @login_required
 def editar_paciente(request, pk):
+    if not requiere_admin_o_medico(request):
+        return redirect('medicos:cita_lista')
+
     """Editar un paciente existente."""
     paciente = get_object_or_404(Paciente, pk=pk)
     form = PacienteForm(request.POST or None, instance=paciente)
@@ -107,6 +126,9 @@ def editar_paciente(request, pk):
 
 @login_required
 def eliminar_paciente(request, pk):
+    if not requiere_admin_o_medico(request):
+        return redirect('medicos:cita_lista')
+
     """Eliminar un paciente (requiere confirmación POST)."""
     paciente = get_object_or_404(Paciente, pk=pk)
 
@@ -125,6 +147,9 @@ def eliminar_paciente(request, pk):
 
 @login_required
 def agregar_historia(request, pk):
+    if not requiere_admin_o_medico(request):
+        return redirect('medicos:cita_lista')
+
     """Agregar una entrada a la historia clínica de un paciente."""
     paciente = get_object_or_404(Paciente, pk=pk)
     form = HistoriaClinicaForm(request.POST or None, initial={'fecha': timezone.now().date()})
@@ -148,6 +173,9 @@ def agregar_historia(request, pk):
 
 @login_required
 def editar_historia(request, pk, historia_pk):
+    if not requiere_admin_o_medico(request):
+        return redirect('medicos:cita_lista')
+
     """Editar una entrada de historia clínica."""
     paciente = get_object_or_404(Paciente, pk=pk)
     historia = get_object_or_404(HistoriaClinica, pk=historia_pk, paciente=paciente)
@@ -170,6 +198,9 @@ def editar_historia(request, pk, historia_pk):
 
 @login_required
 def eliminar_historia(request, pk, historia_pk):
+    if not requiere_admin_o_medico(request):
+        return redirect('medicos:cita_lista')
+
     """Eliminar una entrada de historia clínica."""
     paciente = get_object_or_404(Paciente, pk=pk)
     historia = get_object_or_404(HistoriaClinica, pk=historia_pk, paciente=paciente)
@@ -191,6 +222,9 @@ def eliminar_historia(request, pk, historia_pk):
 
 @login_required
 def exportar_excel(request):
+    if not requiere_admin_o_medico(request):
+        return redirect('medicos:cita_lista')
+
     """Exportar lista de pacientes a Excel."""
     form = BuscarPacienteForm(request.GET or None)
     pacientes = Paciente.objects.all()
@@ -207,7 +241,12 @@ def exportar_excel(request):
         elif activo == '0':
             pacientes = pacientes.filter(activo=False)
 
-    output = exportar_pacientes_excel(pacientes)
+    try:
+        output = exportar_pacientes_excel(pacientes)
+    except ImportError as exc:
+        messages.error(request, f'No se pudo generar el Excel: {exc}')
+        return redirect('pacientes:lista')
+
     response = HttpResponse(
         output,
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -218,6 +257,9 @@ def exportar_excel(request):
 
 @login_required
 def exportar_pdf(request, pk):
+    if not requiere_admin_o_medico(request):
+        return redirect('medicos:cita_lista')
+
     """Exportar historia clínica de un paciente a PDF."""
     paciente = get_object_or_404(Paciente, pk=pk)
     historias = paciente.historias.all()
