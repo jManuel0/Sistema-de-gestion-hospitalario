@@ -168,7 +168,7 @@
             <i class="bi bi-people"></i> Pacientes
         </a>
 
-        {% if user.es_admin or user.is_superuser %}
+        {% if es_admin %}
         <div class="sidebar-section">Administración</div>
         <a href="{% url 'accounts:lista_usuarios' %}" class="nav-link {% if request.resolver_match.url_name == 'lista_usuarios' %}active{% endif %}">
             <i class="bi bi-person-gear"></i> Usuarios
@@ -225,15 +225,17 @@
     <div class="page-content">
         {% if messages %}
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {% with tag=message.tags %}
+            <div class="alert alert-{% if tag == 'error' %}danger{% else %}{{ tag|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
                 <i class="bi
-                    {% if message.tags == 'success' %}bi-check-circle
-                    {% elif message.tags == 'error' or message.tags == 'danger' %}bi-exclamation-circle
-                    {% elif message.tags == 'warning' %}bi-exclamation-triangle
+                    {% if tag == 'success' %}bi-check-circle
+                    {% elif tag == 'error' or tag == 'danger' %}bi-exclamation-circle
+                    {% elif tag == 'warning' %}bi-exclamation-triangle
                     {% else %}bi-info-circle{% endif %} me-2"></i>
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
+            {% endwith %}
             {% endfor %}
         {% endif %}
 
