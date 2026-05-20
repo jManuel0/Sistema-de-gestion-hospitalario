@@ -11,3 +11,8 @@ staticfiles/
 media/
 .DS_Store
 *.log
+
+# Migraciones generadas (cada dev corre makemigrations localmente)
+# Descomenta la siguiente línea si no quieres versionar migraciones:
+# */migrations/*.py
+# */migrations/__pycache__/
