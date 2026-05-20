@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar eliminacion{% endblock %}
+{% block page_title %}Confirmar eliminacion{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-danger">
+            <div class="card-header text-danger"><i class="bi bi-exclamation-triangle me-1"></i> Confirmacion requerida</div>
+            <div class="card-body">
+                <p class="mb-4">Estas seguro de eliminar este {{ objeto_tipo|default:'medico' }}?</p>
+                <div class="alert alert-warning">{{ object }}</div>
+                <form method="post" class="d-flex justify-content-end gap-2">
+                    {% csrf_token %}
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i> Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

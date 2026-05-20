@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar cita{% else %}Nueva cita{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Editar cita{% else %}Nueva cita{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        {% if not object %}
+        <div class="alert alert-info">
+            <div class="fw-semibold mb-1">
+                <i class="bi bi-info-circle me-1"></i> Horarios disponibles
+            </div>
+            <div class="small">
+                Selecciona una fecha y hora dentro del horario del medico. Si eliges una hora ocupada o fuera del rango, el sistema te indicara el motivo exacto.
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">Disponibilidad por medico</div>
+            <div class="card-body">
+                {% if horarios_medicos %}
+                <div class="row g-3">
+                    {% regroup horarios_medicos by medico as grupos_horarios %}
+                    {% for grupo in grupos_horarios %}
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <h6 class="mb-1">{{ grupo.grouper.nombre_completo }}</h6>
+                            <div class="text-muted small mb-2">{{ grupo.grouper.especialidad }}</div>
+                            {% for horario in grupo.list %}
+                            <span class="badge text-bg-light border me-1 mb-1">
+                                {{ horario.get_dia_semana_display }}: {{ horario.hora_inicio|time:'h:i A' }} - {{ horario.hora_fin|time:'h:i A' }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-muted">No hay horarios medicos configurados por el momento.</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">Datos de la cita</div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="row g-3">
+                        {% for field in form %}
+                        <div class="{% if field.name == 'motivo' or field.name == 'observaciones' %}col-12{% else %}col-md-6{% endif %}">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'medicos:cita_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

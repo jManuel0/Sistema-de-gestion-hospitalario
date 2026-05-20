@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     # Apps del proyecto
     'accounts.apps.AccountsConfig',
     'pacientes.apps.PacientesConfig',
+    'medicos.apps.MedicosConfig',
 ]
 
 MIDDLEWARE = [
@@ -91,3 +92,7 @@ AUTH_USER_MODEL = 'accounts.Usuario'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/pacientes/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# Email de pruebas para confirmaciones de citas.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'no-reply@hospital.local'

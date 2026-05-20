@@ -96,6 +96,14 @@ class HistoriaClinica(models.Model):
         null=True,
         verbose_name='Médico tratante'
     )
+    medico = models.ForeignKey(
+        'medicos.Medico',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='historias_clinicas',
+        verbose_name='Medico tratante asociado'
+    )
     fecha = models.DateField(verbose_name='Fecha de consulta')
     motivo_consulta = models.TextField(verbose_name='Motivo de consulta')
     diagnostico = models.TextField(verbose_name='Diagnóstico')
