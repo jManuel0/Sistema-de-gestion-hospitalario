@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center"
+     style="background: linear-gradient(135deg, #1a6b9a 0%, #145580 100%);">
+    <div class="card shadow-lg" style="width: 100%; max-width: 420px;">
+        <div class="card-body p-5">
+            <!-- Logo / Título -->
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                     style="width:64px;height:64px;background:#e8f4fd;">
+                    <i class="bi bi-hospital fs-2" style="color:#1a6b9a;"></i>
+                </div>
+                <h4 class="fw-bold mb-1" style="color:#1a6b9a;">MediSystem</h4>
+                <p class="text-muted small">Sistema de Gestión Hospitalaria</p>
+            </div>
+
+            <h5 class="fw-semibold mb-4 text-center">Iniciar Sesión</h5>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">{{ form.username.label }}</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold small">{{ form.password.label }}</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
+                </button>
+            </form>
+
+            <hr class="my-4">
+
+            <p class="text-center text-muted small mb-0">
+                ¿No tienes cuenta?
+                <a href="{% url 'accounts:registro' %}" class="fw-semibold" style="color:#1a6b9a;">
+                    Regístrate aquí
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Pacientes{% endblock %}
+{% block page_title %}Gestión de Pacientes{% endblock %}
+
+{% block content %}
+<!-- Barra de herramientas -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Pacientes registrados</h5>
+        <small class="text-muted">{{ total }} paciente{{ total|pluralize }} encontrado{{ total|pluralize }}</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'pacientes:exportar_excel' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"
+           class="btn btn-outline-success btn-sm">
+            <i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel
+        </a>
+        <a href="{% url 'pacientes:crear' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-person-plus me-1"></i>Nuevo paciente
+        </a>
+    </div>
+</div>
+
+<!-- Formulario de búsqueda -->
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-7">
+                <label class="form-label small fw-semibold mb-1">Buscar paciente</label>
+                {{ form.q }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold mb-1">Estado</label>
+                {{ form.activo }}
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-search"></i>
+                </button>
+                <a href="{% url 'pacientes:lista' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de pacientes -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>DNI</th>
+                        <th>Nombre completo</th>
+                        <th>Edad</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Estado</th>
+                        <th>Registro</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paciente in pacientes %}
+                    <tr>
+                        <td class="fw-semibold">{{ paciente.dni }}</td>
+                        <td>
+                            <a href="{% url 'pacientes:detalle' paciente.pk %}"
+                               class="text-decoration-none fw-semibold" style="color:#1a6b9a;">
+                                {{ paciente.nombre_completo }}
+                            </a>
+                        </td>
+                        <td>{{ paciente.calcular_edad }} años</td>
+                        <td>{{ paciente.telefono }}</td>
+                        <td class="text-muted small">{{ paciente.email }}</td>
+                        <td>
+                            {% if paciente.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ paciente.fecha_registro|date:"d/m/Y" }}</td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'pacientes:detalle' paciente.pk %}"
+                                   class="btn btn-outline-primary" title="Ver detalle">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'pacientes:editar' paciente.pk %}"
+                                   class="btn btn-outline-warning" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'pacientes:eliminar' paciente.pk %}"
+                                   class="btn btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="bi bi-search fs-2 d-block mb-2"></i>
+                            No se encontraron pacientes con los filtros aplicados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

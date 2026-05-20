@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hospital{% endblock %} | Sistema Hospitalario</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #1a6b9a;
+            --primary-dark: #145580;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .sidebar-brand h5 {
+            color: white;
+            font-weight: 700;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .sidebar-brand small {
+            color: rgba(255,255,255,0.65);
+            font-size: 0.75rem;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.65rem 1.25rem;
+            border-radius: 8px;
+            margin: 2px 8px;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 8px;
+        }
+
+        .sidebar-section {
+            padding: 0.5rem 1.25rem 0.25rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.45);
+            margin-top: 0.5rem;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .page-content {
+            padding: 1.5rem;
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+
+        .card-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Botones */
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        /* Badge de rol */
+        .badge-admin { background-color: #dc3545; }
+        .badge-medico { background-color: #198754; }
+        .badge-paciente { background-color: #0d6efd; }
+
+        /* Tabla */
+        .table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+        }
+
+        /* Alertas */
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<!-- Sidebar -->
+<nav class="sidebar d-flex flex-column">
+    <div class="sidebar-brand">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-hospital fs-4 text-white"></i>
+            <div>
+                <h5>MediSystem</h5>
+                <small>Sistema Hospitalario</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-grow-1 py-2">
+        <div class="sidebar-section">Principal</div>
+        <a href="{% url 'pacientes:lista' %}" class="nav-link {% if request.resolver_match.namespace == 'pacientes' %}active{% endif %}">
+            <i class="bi bi-people"></i> Pacientes
+        </a>
+
+        {% if user.es_admin or user.is_superuser %}
+        <div class="sidebar-section">Administración</div>
+        <a href="{% url 'accounts:lista_usuarios' %}" class="nav-link {% if request.resolver_match.url_name == 'lista_usuarios' %}active{% endif %}">
+            <i class="bi bi-person-gear"></i> Usuarios
+        </a>
+        <a href="/admin/" class="nav-link">
+            <i class="bi bi-shield-lock"></i> Panel Admin
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="border-top border-white border-opacity-25 p-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center"
+                 style="width:36px;height:36px;">
+                <i class="bi bi-person text-white"></i>
+            </div>
+            <div>
+                <div class="text-white fw-semibold" style="font-size:0.85rem;">
+                    {{ user.get_full_name|default:user.username }}
+                </div>
+                <div style="font-size:0.72rem;color:rgba(255,255,255,0.6);">
+                    {{ user.get_rol_display }}
+                </div>
+            </div>
+        </div>
+        <a href="{% url 'accounts:perfil' %}" class="nav-link py-1">
+            <i class="bi bi-person-circle"></i> Mi perfil
+        </a>
+        <form method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="nav-link border-0 bg-transparent w-100 text-start py-1">
+                <i class="bi bi-box-arrow-left"></i> Cerrar sesión
+            </button>
+        </form>
+    </div>
+</nav>
+
+<!-- Main content -->
+<div class="main-content">
+    <div class="topbar d-flex align-items-center justify-content-between">
+        <h6 class="mb-0 fw-semibold text-secondary">
+            {% block page_title %}{% endblock %}
+        </h6>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge rounded-pill
+                {% if user.rol == 'admin' %}bg-danger
+                {% elif user.rol == 'medico' %}bg-success
+                {% else %}bg-primary{% endif %}">
+                {{ user.get_rol_display }}
+            </span>
+        </div>
+    </div>
+
+    <div class="page-content">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                <i class="bi
+                    {% if message.tags == 'success' %}bi-check-circle
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}bi-exclamation-circle
+                    {% elif message.tags == 'warning' %}bi-exclamation-triangle
+                    {% else %}bi-info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+{% else %}
+<!-- Sin autenticación: solo el contenido -->
+<div class="container-fluid">
+    {% if messages %}
+        <div class="position-fixed top-0 end-0 p-3" style="z-index:9999;">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+</div>
+{% endif %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

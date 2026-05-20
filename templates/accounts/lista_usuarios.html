@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+{% block page_title %}Gestión de Usuarios{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-people" style="color:#1a6b9a;"></i>
+            <span>Usuarios del sistema</span>
+        </div>
+        <a href="{% url 'accounts:registro' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-person-plus me-1"></i>Nuevo usuario
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Nombre completo</th>
+                        <th>Correo</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Registro</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr>
+                        <td class="fw-semibold">{{ usuario.username }}</td>
+                        <td>{{ usuario.get_full_name|default:'-' }}</td>
+                        <td>{{ usuario.email|default:'-' }}</td>
+                        <td>
+                            <span class="badge rounded-pill
+                                {% if usuario.rol == 'admin' %}bg-danger
+                                {% elif usuario.rol == 'medico' %}bg-success
+                                {% else %}bg-primary{% endif %}">
+                                {{ usuario.get_rol_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if usuario.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ usuario.date_joined|date:"d/m/Y" }}</td>
+                        <td class="text-center">
+                            {% if usuario != request.user %}
+                            <form method="post" action="{% url 'accounts:toggle_usuario' usuario.pk %}"
+                                  class="d-inline"
+                                  onsubmit="return confirm('¿Confirmas cambiar el estado de este usuario?')">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-sm {% if usuario.activo %}btn-outline-warning{% else %}btn-outline-success{% endif %}">
+                                    <i class="bi {% if usuario.activo %}bi-person-x{% else %}bi-person-check{% endif %}"></i>
+                                    {% if usuario.activo %}Desactivar{% else %}Activar{% endif %}
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted small">Tu cuenta</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No hay usuarios registrados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
