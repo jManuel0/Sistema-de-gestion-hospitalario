@@ -32,7 +32,13 @@ Build Command: ./build.sh
 Start Command: gunicorn hospital.wsgi
 ```
 
-El archivo `runtime.txt` fija Python 3.12.4 para mantener compatibilidad con las dependencias actuales, incluyendo `Pillow==10.3.0` y `psycopg2-binary`.
+El archivo `.python-version` fija Python 3.12.4 para mantener compatibilidad con las dependencias actuales, incluyendo `Pillow==10.3.0` y `psycopg2-binary`.
+
+Si Render sigue intentando construir con Python 3.14, agregar tambien esta variable de entorno en el panel del servicio:
+
+```text
+PYTHON_VERSION=3.12.4
+```
 
 Render tambien puede leer el `Procfile`:
 
