@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard y reportes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .metric-card {
+        min-height: 132px;
+        border-left: 4px solid var(--primary);
+    }
+
+    .metric-icon {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #e7f1f8;
+        color: var(--primary);
+        font-size: 1.25rem;
+    }
+
+    .metric-value {
+        font-size: 1.9rem;
+        font-weight: 700;
+        line-height: 1;
+        color: #1f2937;
+    }
+
+    .metric-label {
+        color: #64748b;
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .chart-box {
+        position: relative;
+        min-height: 320px;
+    }
+
+    .filter-panel .form-label {
+        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div>
+        <h4 class="mb-1 fw-bold">Estadisticas generales</h4>
+        <p class="text-secondary mb-0">
+            {{ filters.periodo_label }}: {{ filters.fecha_inicio|date:'d/m/Y' }} - {{ filters.fecha_fin|date:'d/m/Y' }}
+        </p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-outline-success" href="{% url 'dashboard:export_excel' %}?{{ request.GET.urlencode }}">
+            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+        </a>
+        <a class="btn btn-outline-danger" href="{% url 'dashboard:export_pdf' %}?{{ request.GET.urlencode }}">
+            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+        </a>
+    </div>
+</div>
+
+<div class="card filter-panel mb-4">
+    <div class="card-header">
+        <i class="bi bi-funnel me-2"></i>Filtros
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label" for="periodo">Periodo</label>
+                <select class="form-select" id="periodo" name="periodo">
+                    <option value="hoy" {% if filters.periodo == 'hoy' %}selected{% endif %}>Hoy</option>
+                    <option value="semana" {% if filters.periodo == 'semana' %}selected{% endif %}>Esta semana</option>
+                    <option value="mes" {% if filters.periodo == 'mes' %}selected{% endif %}>Este mes</option>
+                    <option value="rango" {% if filters.periodo == 'rango' %}selected{% endif %}>Rango manual</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="fecha_inicio">Fecha inicio</label>
+                <input class="form-control" type="date" id="fecha_inicio" name="fecha_inicio" value="{{ filters.fecha_inicio|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="fecha_fin">Fecha fin</label>
+                <input class="form-control" type="date" id="fecha_fin" name="fecha_fin" value="{{ filters.fecha_fin|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button class="btn btn-primary flex-fill" type="submit">
+                    <i class="bi bi-search me-1"></i> Aplicar
+                </button>
+                <a class="btn btn-outline-secondary" href="{% url 'dashboard:home' %}">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card metric-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="metric-label">Total pacientes</div>
+                        <div class="metric-value">{{ resumen.total_pacientes }}</div>
+                    </div>
+                    <span class="metric-icon"><i class="bi bi-people"></i></span>
+                </div>
+                <small class="text-secondary">{{ resumen.pacientes_nuevos }} nuevos en el periodo</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card metric-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="metric-label">Total medicos</div>
+                        <div class="metric-value">{{ resumen.total_medicos }}</div>
+                    </div>
+                    <span class="metric-icon"><i class="bi bi-person-badge"></i></span>
+                </div>
+                <small class="text-secondary">{{ resumen.medicos_activos }} medicos activos</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card metric-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="metric-label">Citas en periodo</div>
+                        <div class="metric-value">{{ resumen.total_citas }}</div>
+                    </div>
+                    <span class="metric-icon"><i class="bi bi-calendar-check"></i></span>
+                </div>
+                <small class="text-secondary">{{ resumen.citas_hoy }} citas del dia</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card metric-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="metric-label">Pacientes activos</div>
+                        <div class="metric-value">{{ resumen.pacientes_activos }}</div>
+                    </div>
+                    <span class="metric-icon"><i class="bi bi-heart-pulse"></i></span>
+                </div>
+                <small class="text-secondary">{{ resumen.pacientes_inactivos }} pacientes inactivos</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-secondary small">Pendientes</div>
+                <div class="fs-4 fw-bold">{{ resumen.citas_pendientes }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-secondary small">Confirmadas</div>
+                <div class="fs-4 fw-bold">{{ resumen.citas_confirmadas }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-secondary small">Completadas</div>
+                <div class="fs-4 fw-bold">{{ resumen.citas_completadas }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-secondary small">Canceladas</div>
+                <div class="fs-4 fw-bold">{{ resumen.citas_canceladas }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-bar-chart me-2"></i>Citas por especialidad
+            </div>
+            <div class="card-body">
+                <div class="chart-box">
+                    <canvas id="citasEspecialidadChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-graph-up-arrow me-2"></i>Pacientes nuevos por mes
+            </div>
+            <div class="card-body">
+                <div class="chart-box">
+                    <canvas id="pacientesMesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ charts|json_script:'dashboard-chart-data' }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    const dashboardCharts = JSON.parse(document.getElementById('dashboard-chart-data').textContent);
+
+    const chartColors = ['#1a6b9a', '#198754', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14', '#0d6efd'];
+
+    new Chart(document.getElementById('citasEspecialidadChart'), {
+        type: 'bar',
+        data: {
+            labels: dashboardCharts.citas_especialidad.labels,
+            datasets: [{
+                label: 'Citas',
+                data: dashboardCharts.citas_especialidad.data,
+                backgroundColor: chartColors,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+    });
+
+    new Chart(document.getElementById('pacientesMesChart'), {
+        type: 'line',
+        data: {
+            labels: dashboardCharts.pacientes_mes.labels,
+            datasets: [{
+                label: 'Pacientes nuevos',
+                data: dashboardCharts.pacientes_mes.data,
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25, 135, 84, 0.14)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+    });
+</script>
+{% endblock %}

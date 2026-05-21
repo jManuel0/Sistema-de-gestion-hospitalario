@@ -11,5 +11,6 @@ urlpatterns = [
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('pacientes/', include('pacientes.urls', namespace='pacientes')),
     path('medicos/', include('medicos.urls', namespace='medicos')),
+    path('dashboard/', include('dashboard.urls', namespace='dashboard')),
     path('', lambda request: redirect('pacientes:lista'), name='home'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

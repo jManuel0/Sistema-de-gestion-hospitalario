@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'pacientes.apps.PacientesConfig',
     'medicos.apps.MedicosConfig',
+    'dashboard.apps.DashboardConfig',
 ]
 
 MIDDLEWARE = [
